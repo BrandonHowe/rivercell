@@ -27,7 +27,6 @@
     })
     export default class Sheets extends Vue {
         handleTitleChange = (e) => {
-            console.log(`Sending ${e.target.value}`);
             this.$store.dispatch("changeTitle", e.target.value);
         };
     }

@@ -10,7 +10,8 @@ interface VuexState {
         columns: number
     },
     selected: CellPosition,
-    sheet: string[][]
+    sheet: string[][],
+    defaults: VuexState
 }
 
 interface CellPosition {
@@ -30,6 +31,18 @@ export default new Vuex.Store({
             column: null
         },
         sheet: [],
+        defaults: {
+            title: "Unnamed Project",
+            sheetDims: {
+                rows: 0,
+                columns: 0,
+            },
+            selected: <CellPosition>{
+                row: null,
+                column: null
+            },
+            sheet: [],
+        }
     },
     mutations: {
         saveState (state: VuexState) {
@@ -38,13 +51,18 @@ export default new Vuex.Store({
         loadState (state: VuexState) {
             const storageState = JSON.parse(localStorage.getItem("state"));
             for (const i in state) {
-                state[i] = storageState[i];
-                console.table(storageState[i]);
+                if (i === "default") {
+                    continue;
+                }
+                if (storageState[i]) {
+                    state[i] = storageState[i];
+                } else {
+                    state[i] = state.defaults[i];
+                }
             }
         },
         changeTitle (state: VuexState, newTitle: string) {
             state.title = newTitle;
-            console.log(`New: ${state.title}`);
         },
         initializeSheet (state: VuexState, payload: { rows: number, columns: number }) {
             const sheet = [];
@@ -59,7 +77,6 @@ export default new Vuex.Store({
             state.sheet = sheet;
         },
         updateCellValue (state: VuexState, payload: { position: CellPosition, newValue: string }) {
-            console.log(`We received: ${payload.newValue}`);
             state.sheet[payload.position.row][payload.position.column] = payload.newValue;
         },
         changeSelected (state: VuexState, newPos: CellPosition) {
@@ -72,10 +89,10 @@ export default new Vuex.Store({
             commit("saveState");
         },
         initializeSheet ({ commit }, payload) {
-            if (!localStorage.getItem("state")) {
-                commit("initializeSheet", payload);
-            } else {
+            if (localStorage.getItem("state")) {
                 commit("loadState");
+            } else {
+                commit("initializeSheet", payload);
             }
         },
         updateCellValue ({commit}, payload) {

@@ -1,13 +1,12 @@
 <template>
-    <div :class="inputting ? 'cellSelected' : 'cell'">
+    <div :class="inputting ? 'cellSelected' : 'cell'" @click="enableInputting">
         <input
             v-if="inputting"
             class="cellInput"
             v-model="currValue"
             @input="updateCellValue()"
-            @blur="inputting = false"
         />
-        <div v-else class="nonInputtingLabel" @click="inputting = true">
+        <div v-else class="nonInputtingLabel">
             <label>{{ currValue }}</label>
         </div>
     </div>
@@ -18,16 +17,24 @@
     import { Component, Prop, Vue } from 'vue-property-decorator';
     import { CellPosition } from "@/store";
 
-    @Component
+    @Component({
+        computed: {
+            inputting () {
+                return this.$store.state.selected.row === this.cellLocation.row && this.$store.state.selected.column === this.cellLocation.column;
+            }
+        }
+    })
     export default class Cell extends Vue {
         @Prop() private cellValue: string;
         @Prop() private cellLocation: CellPosition;
 
-        inputting = false;
         currValue = this.cellValue;
 
+        enableInputting () {
+            this.$store.commit("changeSelected", this.cellLocation);
+        }
+
         updateCellValue () {
-            console.log(`Updating: ${this.currValue}`);
             this.$store.dispatch("updateCellValue", {position: this.cellLocation, newValue: this.currValue});
         }
     }
