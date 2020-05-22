@@ -10,6 +10,7 @@ interface VuexState {
         columns: number
     },
     selected: CellPosition,
+    otherSelected: CellPosition[]
     sheet: string[][],
     defaults: VuexState
 }
@@ -30,6 +31,7 @@ export default new Vuex.Store({
             row: null,
             column: null
         },
+        otherSelected: <CellPosition[]>[],
         sheet: [],
         defaults: {
             title: "Unnamed Project",
@@ -41,6 +43,7 @@ export default new Vuex.Store({
                 row: null,
                 column: null
             },
+            otherSelected: <CellPosition[]>[],
             sheet: [],
         }
     },
@@ -60,6 +63,9 @@ export default new Vuex.Store({
                     state[i] = state.defaults[i];
                 }
             }
+        },
+        clearSave (state: VuexState) {
+            localStorage.removeItem("state");
         },
         changeTitle (state: VuexState, newTitle: string) {
             state.title = newTitle;
@@ -81,6 +87,23 @@ export default new Vuex.Store({
         },
         changeSelected (state: VuexState, newPos: CellPosition) {
             state.selected = newPos;
+            state.otherSelected = [];
+        },
+        addSelectionArr (state: VuexState, newPos: CellPosition[]) {
+            state.otherSelected.push(...newPos);
+        },
+        areaSelect (state: VuexState, cornerPos: CellPosition) {
+            state.otherSelected = [];
+            const selectedCorner = state.selected;
+            const topCorner = selectedCorner.row > cornerPos.row ? cornerPos : selectedCorner;
+            const bottomCorner = selectedCorner.row < cornerPos.row ? cornerPos : selectedCorner;
+            const leftCorner = selectedCorner.column > cornerPos.column ? cornerPos : selectedCorner;
+            const rightCorner = selectedCorner.column < cornerPos.column ? cornerPos : selectedCorner;
+            for (let i = topCorner.row; i <= bottomCorner.row; i++) {
+                for (let j = leftCorner.column; j <= rightCorner.column; j++) {
+                    state.otherSelected.push({row: i, column: j});
+                }
+            }
         }
     },
     actions: {
@@ -101,6 +124,28 @@ export default new Vuex.Store({
         }
     },
     modules: {},
+    getters: {
+        rowColsWithSelections: state => {
+            const rows = [];
+            const cols = [];
+            if (state.selected.row !== null) {
+                rows.push(state.selected.row);
+                cols.push(state.selected.column);
+            }
+            for (const selection of state.otherSelected) {
+                if (!rows.includes(selection.row)) {
+                    rows.push(selection.row);
+                }
+                if (!cols.includes(selection.column)) {
+                    cols.push(selection.column);
+                }
+            }
+            return {rows, cols};
+        },
+        sheetToCoords: state => {
+            return state.sheet.flatMap((l, idx) => l.map((_, index) => ({row: idx, column: index})));
+        }
+    }
 });
 
 export { CellPosition };

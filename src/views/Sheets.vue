@@ -2,14 +2,14 @@
     <div
         class="sheets"
     >
-        <h1>Hello everyone</h1>
         <input
             class="titleInput"
             placeholder="Title"
             :value="title"
             @change="handleTitleChange"
         />
-        {{ title }}
+        {{ $store.getters.rowColsWithSelections }}
+        <button @click="$store.commit('clearSave')">Clear data</button>
         <Sheet></Sheet>
     </div>
 </template>
@@ -20,7 +20,7 @@
     import Sheet from "@/components/Sheet.vue";
 
     @Component({
-        components: {Sheet},
+        components: { Sheet },
         computed: mapState([
             "title",
         ]),
