@@ -7,11 +7,11 @@ module.exports = merge(baseConfig, {
         path: path.resolve(__dirname, 'dist'),
         filename: 'sheets.bundle.dev.js'
     },
-    devServer: {
-        contentBase: path.join(__dirname, 'dist'),
-        compress: true,
-        port: 1100
-    },
+    // devServer: {
+    //     contentBase: path.join(__dirname, 'dist'),
+    //     compress: true,
+    //     port: 1100
+    // },
     mode: "development",
     watch: true,
 });

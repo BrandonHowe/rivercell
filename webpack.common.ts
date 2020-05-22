@@ -34,11 +34,9 @@ module.exports = {
                 ]
             },
             {
-                test: /\.(jpe?g|png|gif|svg)$/i,
-                loader: "file-loader",
-                options: {
-                    esModule: false
-                }
+                test: /\.(jpg|jpeg|gif|png|ico)$/,
+                exclude: /node_modules/,
+                loader:'file-loader'
             }
         ],
     },
@@ -51,7 +49,7 @@ module.exports = {
         extensions: [ '.tsx', '.ts', '.js'],
     },
     plugins: [
-        new FaviconsWebpackPlugin('./public/favicon.ico'),
+        new FaviconsWebpackPlugin("./src/assets/excel.png"),
         new VueLoaderPlugin()
     ]
 };
