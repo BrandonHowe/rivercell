@@ -16,6 +16,7 @@ on:
                 run: |
                     npm install
                     npm run prod
+
             -   name: Deploy 🚀
                 uses: JamesIves/github-pages-deploy-action@releases/v3
                 with:
