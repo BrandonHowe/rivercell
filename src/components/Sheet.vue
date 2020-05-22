@@ -25,7 +25,7 @@
                 v-for="num in Array.from(Array($store.state.sheetDims.columns).keys())"
                 :style="{'grid-column': num + 2}"
                 :key="`top${num}`"
-                :cell-value="colName(num)"
+                :cell-value="colName(num).toUpperCase()"
                 :cells-to-select="$store.state.sheet.map((_, idx) => ({row: idx, column: num}))"
             ></SelectorCell>
         </div>

@@ -8,7 +8,7 @@
             :value="title"
             @change="handleTitleChange"
         />
-        {{ $store.getters.rowColsWithSelections }}
+        {{ title }}
         <button @click="$store.commit('clearSave')">Clear data</button>
         <Sheet></Sheet>
     </div>
