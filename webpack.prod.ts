@@ -4,7 +4,7 @@ const path = require('path');
 
 module.exports = merge(baseConfig, {
     output: {
-        path: path.resolve(__dirname, 'production'),
+        path: path.resolve(__dirname, 'public'),
         filename: 'sheets.bundle.prod.js'
     },
     mode: "production",
