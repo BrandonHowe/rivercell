@@ -1,4 +1,6 @@
-# sheetsclone
+# RiverCell
+
+A simple, fast online spreadsheet.
 
 ## Project setup
 ```
