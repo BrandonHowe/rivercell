@@ -4,6 +4,9 @@ node_modules
 /production
 /prod
 
+# Compiled JS files
+src/**/*.js
+
 # local env files
 .env.local
 .env.*.local
