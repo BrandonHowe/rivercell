@@ -47,6 +47,8 @@
         enableInputting (e) {
             if (e.shiftKey) {
                 this.$store.commit("areaSelect", this.cellLocation);
+            } else if (e.ctrlKey) {
+                this.$store.commit("addSelectionArr", [this.cellLocation]);
             } else {
                 this.$store.commit("changeSelected", this.cellLocation);
             }
