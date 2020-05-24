@@ -3,7 +3,10 @@ const builtInFuncs = {
     MINUS: (a: number, b: number) => a - b,
     MULTIPLY: (a: number, b: number) => a * b,
     DIVIDE: (a: number, b: number) => a / b,
-    CONCAT: (a: number | string, b: number | string) => a.toString() + b.toString()
+    CONCAT: (a: number | string, b: number | string) => {
+        const rawSum = a.toString() + b.toString();
+        return Number(rawSum) ? Number(rawSum) : rawSum;
+    }
 };
 
 export { builtInFuncs }

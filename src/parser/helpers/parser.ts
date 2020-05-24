@@ -1,4 +1,13 @@
-import { BinaryExpression, ErrorExpression, Expression, Literal, Variable } from "@/parser/helpers/expression";
+import {
+    BinaryExpression,
+    ErrorExpression,
+    Expression,
+    FunctionCall,
+    Literal,
+    Variable,
+} from "@/parser/helpers/expression";
+
+const TypeGuard = <T, U extends T>(val: T, result: boolean): val is U => result;
 
 const isLiteral = (expr: Expression): expr is Literal => expr.type === "Literal";
 
@@ -8,4 +17,6 @@ const isVariable = (expr: Expression): expr is Variable => expr.type === "Variab
 
 const isBinaryExpression = (expr: Expression): expr is BinaryExpression => expr.type === "BinaryExpression";
 
-export { isLiteral, isError, isVariable, isBinaryExpression };
+const isFunctionCall = (expr: Expression): expr is FunctionCall => expr.type === "FunctionCall";
+
+export { TypeGuard, isLiteral, isError, isVariable, isBinaryExpression, isFunctionCall };

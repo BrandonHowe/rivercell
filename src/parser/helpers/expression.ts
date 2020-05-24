@@ -1,5 +1,6 @@
 type ExpressionType
     = "Error"
+    | "FunctionCall"
     | "BinaryExpression"
     | "TernaryExpression"
     | "Literal"
@@ -11,7 +12,7 @@ interface Expression {
 
 interface Literal extends Expression {
     type: "Literal",
-    value: unknown
+    value: number | string
 }
 
 interface Variable extends Expression {
@@ -31,11 +32,18 @@ interface BinaryExpression extends Expression {
     right: Expression
 }
 
+interface FunctionCall extends Expression {
+    type: "FunctionCall",
+    name: string,
+    args: Expression[]
+}
+
 export {
     ExpressionType,
     Expression,
     ErrorExpression,
     Literal,
     Variable,
-    BinaryExpression
+    BinaryExpression,
+    FunctionCall
 }
