@@ -1,3 +1,21 @@
+{
+    const operToName = {
+        "+": "ADD",
+        "-": "MINUS",
+        "*": "MULTIPLY",
+        "/": "DIVIDE",
+        "^": "POW",
+        "%": "MOD",
+        "<>": "CONCAT",
+        "==": "EQUAL",
+        ">=": "GREQUAL",
+        ">": "GREATER",
+        "<": "LESS",
+        "<=": "LEQUAL",
+        "!=": "NOTEQUAL",
+    }
+}
+
 Program
   = body:SourceElements? {
       return {
@@ -24,13 +42,28 @@ FunctionCall
       }
     }
 
+BinaryOperator
+  = "+"
+  / "-"
+  / "*"
+  / "/"
+  / "^"
+  / "%"
+  / "<>"
+  / "=="
+  / ">="
+  / "<="
+  / ">"
+  / "<"
+  / "=="
+
 BinaryExpression
-  = head:Factor tail:(_ ("+" / "-" / "*" / "/" / "<>") _ Factor)* {
+  = head:Factor tail:(_ BinaryOperator _ Factor)* {
       return tail.reduce(function(result, element) {
         const left = result;
         const right = element[3];
         const rawOp = element[1];
-        const oper = rawOp === "+" ? "ADD" : rawOp === "-" ? "MINUS" : rawOp === "*" ? "MULTIPLY" : rawOp === "/" ? "DIVIDE" : rawOp === "<>" ? "CONCAT" : "Else";
+        const oper = operToName[rawOp];
           return {
             type: "BinaryExpression",
             operator: oper,

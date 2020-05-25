@@ -6,6 +6,8 @@ type ExpressionType
     | "Literal"
     | "Variable"
 
+type CellValue = number | string | boolean;
+
 interface Program {
     type: "Program",
     body: Expression[]
@@ -17,7 +19,7 @@ interface Expression {
 
 interface Literal extends Expression {
     type: "Literal",
-    value: number | string
+    value: CellValue
 }
 
 interface Variable extends Expression {
@@ -45,6 +47,7 @@ interface FunctionCall extends Expression {
 
 export {
     Program,
+    CellValue,
     ExpressionType,
     Expression,
     ErrorExpression,

@@ -1,11 +1,9 @@
 import { isBinaryExpression, isError, isFunctionCall, isLiteral, isVariable, TypeGuard } from "./helpers/parser";
-import { Expression, BinaryExpression, Literal, ErrorExpression, FunctionCall, Program } from "./helpers/expression";
+import { CellValue, Expression, BinaryExpression, Literal, ErrorExpression, FunctionCall, Program } from "./helpers/expression";
 import { builtInFuncs } from "./helpers/builtInFuncs";
 import parser from "./lexer";
 
-type Cell = number | string;
-
-const parseBinaryExpression = (expr: BinaryExpression, cells: Record<string, Cell>, functions: Record<string, Function>): Literal | ErrorExpression => {
+const parseBinaryExpression = (expr: BinaryExpression, cells: Record<string, CellValue>, functions: Record<string, Function>): Literal | ErrorExpression => {
     const left = parseExpression(expr.left, cells, functions);
     const right = parseExpression(expr.right, cells, functions);
     if (!builtInFuncs[expr.operator]) {
@@ -18,13 +16,13 @@ const parseBinaryExpression = (expr: BinaryExpression, cells: Record<string, Cel
     } else if (isError(right)) {
         return right;
     } else {
-        if (expr.operator === "ADD" || expr.operator === "MINUS" || expr.operator === "MULTIPLY" || expr.operator === "DIVIDE") {
-            if (typeof left.value !== "number") {
+        if (["ADD", "MINUS", "MULTIPLY", "DIVIDE"].includes(expr.operator)) {
+            if (typeof left.value === "string") {
                 return {
                     type: "Error",
                     message: `Parameter 1 of ${expr.operator} expects a number value. But ${left.value} is a text and cannot be coerced to a number.`,
                 };
-            } else if (typeof right.value !== "number") {
+            } else if (typeof right.value === "string") {
                 return {
                     type: "Error",
                     message: `Parameter 2 of ${expr.operator} expects a number value. But ${right.value} is a text and cannot be coerced to a number.`,
@@ -35,7 +33,7 @@ const parseBinaryExpression = (expr: BinaryExpression, cells: Record<string, Cel
                     value: builtInFuncs[expr.operator](left.value, right.value),
                 };
             }
-        } else if (expr.operator === "CONCAT") {
+        } else if (["CONCAT", "EQUAL", "GREQUAL", "GREATER", "LESS", "LEQUAL", "NOTEQUAL"]) {
             return {
                 type: "Literal",
                 value: builtInFuncs[expr.operator](left.value, right.value),
@@ -49,7 +47,7 @@ const parseBinaryExpression = (expr: BinaryExpression, cells: Record<string, Cel
     }
 };
 
-const parseFunction = (expr: FunctionCall, cells: Record<string, Cell>, functions: Record<string, Function>): Literal | ErrorExpression => {
+const parseFunction = (expr: FunctionCall, cells: Record<string, CellValue>, functions: Record<string, Function>): Literal | ErrorExpression => {
     const func = functions[expr.name.toUpperCase()];
     if (func) {
         if (func.length !== expr.args.length) {
@@ -76,7 +74,7 @@ const parseFunction = (expr: FunctionCall, cells: Record<string, Cell>, function
     }
 };
 
-const parseExpression = (expr: Expression, cells: Record<string, Cell>, functions: Record<string, Function>): Literal | ErrorExpression => {
+const parseExpression = (expr: Expression, cells: Record<string, CellValue>, functions: Record<string, Function>): Literal | ErrorExpression => {
     if (isError(expr)) {
         return expr;
     } else if (isLiteral(expr)) {
@@ -93,7 +91,7 @@ const parseExpression = (expr: Expression, cells: Record<string, Cell>, function
     }
 };
 
-const parseProgram = (program: Program, cells: Record<string, Cell>, functions: Record<string, Function>): Literal | ErrorExpression => {
+const parseProgram = (program: Program, cells: Record<string, CellValue>, functions: Record<string, Function>): Literal | ErrorExpression => {
     const results = [];
     for (const expr of program.body) {
         const evaluated = parseExpression(expr, cells, functions);
@@ -112,7 +110,7 @@ const cells = {
     A4: "baasdf",
 };
 const functions = builtInFuncs;
-const stringToParse = 'add(multiply(3, 4), 2 <> 5)\n1 + 2';
+const stringToParse = '8 % 3';
 console.log(`Parsing ${stringToParse}`);
 // @ts-ignore
 console.log(parseProgram(parser.parse(stringToParse), cells, functions));
