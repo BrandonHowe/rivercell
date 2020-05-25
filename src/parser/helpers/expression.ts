@@ -6,6 +6,11 @@ type ExpressionType
     | "Literal"
     | "Variable"
 
+interface Program {
+    type: "Program",
+    body: Expression[]
+}
+
 interface Expression {
     type: ExpressionType
 }
@@ -39,6 +44,7 @@ interface FunctionCall extends Expression {
 }
 
 export {
+    Program,
     ExpressionType,
     Expression,
     ErrorExpression,

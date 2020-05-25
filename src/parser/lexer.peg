@@ -1,3 +1,16 @@
+Program
+  = body:SourceElements? {
+      return {
+        type: "Program",
+        body: body !== null ? body : []
+      };
+    }
+
+SourceElements
+  = head:Expression tail:(_ Expression)* {
+      return [head, ...tail.map(l => l[1])];
+    }
+
 Expression
   = FunctionCall
   / BinaryExpression

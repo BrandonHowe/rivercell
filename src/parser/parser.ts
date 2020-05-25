@@ -1,5 +1,5 @@
 import { isBinaryExpression, isError, isFunctionCall, isLiteral, isVariable, TypeGuard } from "./helpers/parser";
-import { Expression, BinaryExpression, Literal, ErrorExpression, FunctionCall } from "./helpers/expression";
+import { Expression, BinaryExpression, Literal, ErrorExpression, FunctionCall, Program } from "./helpers/expression";
 import { builtInFuncs } from "./helpers/builtInFuncs";
 import parser from "./lexer";
 
@@ -93,12 +93,26 @@ const parseExpression = (expr: Expression, cells: Record<string, Cell>, function
     }
 };
 
+const parseProgram = (program: Program, cells: Record<string, Cell>, functions: Record<string, Function>): Literal | ErrorExpression => {
+    const results = [];
+    for (const expr of program.body) {
+        const evaluated = parseExpression(expr, cells, functions);
+        if (isError(evaluated)) {
+            return evaluated;
+        } else {
+            results.push(evaluated);
+        }
+    }
+    return results[results.length - 1];
+};
+
 export { Expression };
 
 const cells = {
     A4: "baasdf",
 };
 const functions = builtInFuncs;
-const stringToParse = 'add(multiply(3, 4), 2 <> 5)';
+const stringToParse = 'add(multiply(3, 4), 2 <> 5)\n1 + 2';
 console.log(`Parsing ${stringToParse}`);
-console.log(parseExpression(parser.parse(stringToParse), cells, functions));
+// @ts-ignore
+console.log(parseProgram(parser.parse(stringToParse), cells, functions));
