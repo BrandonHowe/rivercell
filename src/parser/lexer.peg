@@ -123,7 +123,7 @@ Number
 Integer "integer"
   = _ [0-9]+ {
       return {
-        type: "Literal",
+        type: "NumberLiteral",
         value: parseInt(text(), 10)
       }
     }
@@ -131,24 +131,24 @@ Integer "integer"
 Float "float"
   = _ [0-9]+"."[0-9]+ {
       return {
-        type: "Literal",
+        type: "NumberLiteral",
         value: parseFloat(text(), 10)
       }
     }
 
 String "string"
   = "'" chars:char* "'" { return {
-    type: "Literal",
+    type: "StringLiteral",
     value: chars.join("")
   } }
   / '"' chars:char* '"' { return {
-    type: "Literal",
+    type: "StringLiteral",
     value: chars.join("")
   } }
 
 Boolean
-  = "true" { return {type: "Literal", value: true} }
-  / "false" { return {type: "Literal", value: false} }
+  = "true" { return {type: "BooleanLiteral", value: true} }
+  / "false" { return {type: "BooleanLiteral", value: false} }
 
 CellRange
   = start:Variable ":" end:Variable {

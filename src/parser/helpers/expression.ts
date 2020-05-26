@@ -3,7 +3,9 @@ type ExpressionType
     | "FunctionCall"
     | "BinaryExpression"
     | "ConditionalExpression"
-    | "Literal"
+    | "NumberLiteral"
+    | "StringLiteral"
+    | "BooleanLiteral"
     | "Variable"
     | "CellRange"
     | "Array"
@@ -19,9 +21,19 @@ interface Expression {
     type: ExpressionType
 }
 
-interface Literal extends Expression {
-    type: "Literal",
-    value: CellValue
+interface NumberLiteral extends Expression {
+    type: "NumberLiteral",
+    value: number
+}
+
+interface StringLiteral extends Expression {
+    type: "StringLiteral",
+    value: string
+}
+
+interface BooleanLiteral extends Expression {
+    type: "BooleanLiteral",
+    value: boolean
 }
 
 interface Variable extends Expression {
@@ -33,11 +45,6 @@ interface CellRange extends Expression {
     type: "CellRange",
     start: Variable,
     end: Variable
-}
-
-interface ArrayExpression extends Expression {
-    type: "Array",
-    values: Expression[]
 }
 
 interface ErrorExpression extends Expression {
@@ -52,13 +59,6 @@ interface BinaryExpression extends Expression {
     right: Expression
 }
 
-interface ConditionalExpression extends Expression {
-    type: "ConditionalExpression",
-    condition: BinaryExpression,
-    success: Expression,
-    failure: Expression
-}
-
 interface FunctionCall extends Expression {
     type: "FunctionCall",
     name: string,
@@ -71,11 +71,11 @@ export {
     ExpressionType,
     Expression,
     ErrorExpression,
-    ArrayExpression,
-    Literal,
+    NumberLiteral,
+    BooleanLiteral,
+    StringLiteral,
     Variable,
     CellRange,
     BinaryExpression,
-    ConditionalExpression,
     FunctionCall
 }
