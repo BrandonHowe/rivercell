@@ -14,6 +14,9 @@
         "<=": "LEQUAL",
         "!=": "NOTEQUAL",
     }
+    const infixes = {
+        ">>=": "BIND"
+    }
 }
 
 Program
@@ -31,6 +34,8 @@ SourceElements
 
 Expression
   = FunctionCall
+  / InfixExpression
+  / ConditionalExpression
   / BinaryExpression
 
 FunctionCall
@@ -39,6 +44,28 @@ FunctionCall
         type: "FunctionCall",
         name: name.join(""),
         args: args.args
+      }
+    }
+
+InfixOperator
+  = ">>="
+
+InfixExpression
+  = left:Factor _ operator:InfixOperator right:CommaSeparatedList {
+      return {
+        type: "InfixExpression",
+        operator: infixes[operator],
+        args: [left, ...right.args]
+      }
+    }
+
+ConditionalExpression
+  = condition:BinaryExpression  _ "?" success:Expression _ ":" failure:Expression {
+      return {
+        type: "ConditionalExpression",
+        condition,
+        success,
+        failure
       }
     }
 
@@ -84,23 +111,20 @@ CommaSeparatedList
 Factor
   = "(" _ expr:BinaryExpression _ ")" { return expr; }
   / String
-  / Float
-  / Integer
+  / Number
+  / Boolean
+  / CellRange
   / Variable
+
+Number
+  = Integer
+  / Float
 
 Integer "integer"
   = _ [0-9]+ {
       return {
         type: "Literal",
         value: parseInt(text(), 10)
-      }
-    }
-
-Variable "variable"
-  = _ [A-Z]+[0-9]+ {
-      return {
-        type: "Variable",
-        value: Number.isNaN(Number(text())) ? text() : Number(text())
       }
     }
 
@@ -112,10 +136,6 @@ Float "float"
       }
     }
 
-_ "whitespace"
-  = [ \t\n\r]*
-
-
 String "string"
   = "'" chars:char* "'" { return {
     type: "Literal",
@@ -125,6 +145,30 @@ String "string"
     type: "Literal",
     value: chars.join("")
   } }
+
+Boolean
+  = "true" { return {type: "Literal", value: true} }
+  / "false" { return {type: "Literal", value: false} }
+
+CellRange
+  = start:Variable ":" end:Variable {
+      return {
+        type: "CellRange",
+        start,
+        end
+      }
+    }
+
+Variable "variable"
+  = _ [A-Z]+[0-9]+ {
+      return {
+        type: "Variable",
+        value: Number.isNaN(Number(text())) ? text() : Number(text())
+      }
+    }
+
+_ "whitespace"
+  = [ \t\n\r]*
 
 char
   = [^\0-\x1F\x22\x5C\x27]

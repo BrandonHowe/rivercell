@@ -2,9 +2,11 @@ type ExpressionType
     = "Error"
     | "FunctionCall"
     | "BinaryExpression"
-    | "TernaryExpression"
+    | "ConditionalExpression"
     | "Literal"
     | "Variable"
+    | "CellRange"
+    | "Array"
 
 type CellValue = number | string | boolean;
 
@@ -27,6 +29,17 @@ interface Variable extends Expression {
     value: string
 }
 
+interface CellRange extends Expression {
+    type: "CellRange",
+    start: Variable,
+    end: Variable
+}
+
+interface ArrayExpression extends Expression {
+    type: "Array",
+    values: Expression[]
+}
+
 interface ErrorExpression extends Expression {
     type: "Error"
     message: string
@@ -37,6 +50,13 @@ interface BinaryExpression extends Expression {
     operator: string,
     left: Expression,
     right: Expression
+}
+
+interface ConditionalExpression extends Expression {
+    type: "ConditionalExpression",
+    condition: BinaryExpression,
+    success: Expression,
+    failure: Expression
 }
 
 interface FunctionCall extends Expression {
@@ -51,8 +71,11 @@ export {
     ExpressionType,
     Expression,
     ErrorExpression,
+    ArrayExpression,
     Literal,
     Variable,
+    CellRange,
     BinaryExpression,
+    ConditionalExpression,
     FunctionCall
 }
