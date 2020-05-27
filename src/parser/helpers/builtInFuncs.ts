@@ -103,7 +103,7 @@ const builtInFuncs: Record<string, Func> = {
     // }
 };
 
-const infixes: Record<string, string> = {
+const builtInInfixes: Record<string, string> = {
     "+": "ADD",
     "-": "MINUS",
     "*": "MULTIPLY",
@@ -111,4 +111,4 @@ const infixes: Record<string, string> = {
     "<>": "CONCAT"
 };
 
-export { builtInFuncs, infixes, Func };
+export { builtInFuncs, builtInInfixes, Func };

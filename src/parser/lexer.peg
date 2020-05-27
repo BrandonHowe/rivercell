@@ -44,7 +44,7 @@ FunctionCall
     }
 
 InfixOperator
-  = [^ ]+
+  = [^, ]+
 
 InfixExpression
   = ArithmeticInfix
