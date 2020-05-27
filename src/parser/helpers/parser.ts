@@ -1,5 +1,5 @@
 import {
-    BinaryExpression, CellRange,
+    CellRange,
     ErrorExpression,
     Expression,
     FunctionCall,
@@ -12,8 +12,6 @@ const isError = (expr: Expression): expr is ErrorExpression => expr.type === "Er
 
 const isVariable = (expr: Expression): expr is Variable => expr.type === "Variable";
 
-const isBinaryExpression = (expr: Expression): expr is BinaryExpression => expr.type === "BinaryExpression";
-
 const isFunctionCall = (expr: Expression): expr is FunctionCall => expr.type === "FunctionCall";
 
-export { TypeGuard, isError, isVariable, isBinaryExpression, isFunctionCall };
+export { TypeGuard, isError, isVariable, isFunctionCall };

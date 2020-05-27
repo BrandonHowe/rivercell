@@ -1,46 +1,47 @@
-import { BooleanLiteral, ExpressionType, NumberLiteral, StringLiteral } from "@/parser/helpers/expression";
+import { BooleanLiteral, Expression, ExpressionType, NumberLiteral, StringLiteral } from "@/parser/helpers/expression";
 
 type FuncArgType = ExpressionType;
 type FuncArgAllowedType = NumberLiteral | StringLiteral | BooleanLiteral | unknown[] | any;
 
 interface Func {
     argTypes: FuncTyping,
-    apply: (...args: FuncArgAllowedType) => FuncArgAllowedType
+    apply: (...args: FuncArgAllowedType) => Expression
 }
 
 interface FuncTyping {
     input: FuncArgType[][],
-    output: FuncArgType
+    output: FuncArgType[]
 }
 
 type NumOrBool = NumberLiteral | BooleanLiteral;
+type NumOrBoolOrString = NumberLiteral | BooleanLiteral | StringLiteral;
 
 const builtInFuncs: Record<string, Func> = {
     ADD: {
         argTypes: {
             input: [["NumberLiteral", "BooleanLiteral"], ["NumberLiteral", "BooleanLiteral"]],
-            output: "NumberLiteral"
+            output: ["NumberLiteral"]
         },
         apply: (a: NumOrBool, b: NumOrBool) => ({type: "NumberLiteral", value: Number(a.value) + Number(b.value)}),
     },
     MINUS: {
         argTypes: {
             input: [["NumberLiteral", "BooleanLiteral"], ["NumberLiteral", "BooleanLiteral"]],
-            output: "NumberLiteral"
+            output: ["NumberLiteral"]
         },
         apply: (a: NumOrBool, b: NumOrBool) => ({type: "NumberLiteral", value: Number(a.value) - Number(b.value)}),
     },
     MULTIPLY: {
         argTypes: {
             input: [["NumberLiteral", "BooleanLiteral"], ["NumberLiteral", "BooleanLiteral"]],
-            output: "NumberLiteral"
+            output: ["NumberLiteral"]
         },
         apply: (a: NumOrBool, b: NumOrBool) => ({type: "NumberLiteral", value: Number(a.value) * Number(b.value)}),
     },
     DIVIDE: {
         argTypes: {
             input: [["NumberLiteral", "BooleanLiteral"], ["NumberLiteral", "BooleanLiteral"]],
-            output: "NumberLiteral"
+            output: ["NumberLiteral"]
         },
         apply: (a: NumOrBool, b: NumOrBool) => ({type: "NumberLiteral", value: Number(a.value) / Number(b.value)}),
     },
@@ -52,17 +53,26 @@ const builtInFuncs: Record<string, Func> = {
     //     argTypes: [["number", "boolean"], ["number", "boolean"]],
     //     apply: (a: NumOrBool, b: NumOrBool) => Number(a) % Number(b),
     // },
-    // CONCAT: {
-    //     argTypes: [["number", "boolean", "string", "array"], ["number", "boolean", "string", "array"]],
-    //     apply: <T extends CellValue | unknown[]>(a: T, b: T) => {
-    //         if (!Array.isArray(a) && !Array.isArray(b)) {
-    //             const rawSum = a.toString() + b.toString();
-    //             return Number(rawSum) ? Number(rawSum) : rawSum;
-    //         } else if (Array.isArray(a) && Array.isArray(b)) {
-    //             return [...a, ...b];
-    //         }
-    //     },
-    // },
+    CONCAT: {
+        argTypes: {
+            input: [["NumberLiteral", "BooleanLiteral", "StringLiteral"], ["NumberLiteral", "BooleanLiteral", "StringLiteral"]],
+            output: ["NumberLiteral", "StringLiteral"]
+        },
+        apply: (a: NumOrBoolOrString, b: NumOrBoolOrString) => {
+            const res = a.value.toString() + b.value.toString();
+            if (Number(res)) {
+                return {
+                    type: "NumberLiteral",
+                    value: Number(res)
+                }
+            } else {
+                return {
+                    type: "StringLiteral",
+                    value: res
+                }
+            }
+        },
+    },
     // EQUAL: {
     //     argTypes: [["number", "string", "boolean"], ["number", "string", "boolean"]],
     //     apply: (a: CellValue, b: CellValue) => a === b
@@ -93,4 +103,12 @@ const builtInFuncs: Record<string, Func> = {
     // }
 };
 
-export { builtInFuncs, Func };
+const infixes: Record<string, string> = {
+    "+": "ADD",
+    "-": "MINUS",
+    "*": "MULTIPLY",
+    "/": "DIVIDE",
+    "<>": "CONCAT"
+};
+
+export { builtInFuncs, infixes, Func };

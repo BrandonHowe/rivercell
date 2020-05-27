@@ -8,7 +8,7 @@ type ExpressionType
     | "BooleanLiteral"
     | "Variable"
     | "CellRange"
-    | "Array"
+    | "InfixExpression"
 
 type CellValue = number | string | boolean;
 
@@ -52,16 +52,15 @@ interface ErrorExpression extends Expression {
     message: string
 }
 
-interface BinaryExpression extends Expression {
-    type: "BinaryExpression",
-    operator: string,
-    left: Expression,
-    right: Expression
-}
-
 interface FunctionCall extends Expression {
     type: "FunctionCall",
     name: string,
+    args: Expression[]
+}
+
+interface InfixExpression extends Expression {
+    type: "InfixExpression",
+    operator: string,
     args: Expression[]
 }
 
@@ -71,11 +70,11 @@ export {
     ExpressionType,
     Expression,
     ErrorExpression,
+    InfixExpression,
     NumberLiteral,
     BooleanLiteral,
     StringLiteral,
     Variable,
     CellRange,
-    BinaryExpression,
     FunctionCall
 }

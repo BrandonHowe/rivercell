@@ -14,9 +14,6 @@
         "<=": "LEQUAL",
         "!=": "NOTEQUAL",
     }
-    const infixes = {
-        ">>=": "BIND"
-    }
 }
 
 Program
@@ -35,8 +32,7 @@ SourceElements
 Expression
   = FunctionCall
   / InfixExpression
-  / ConditionalExpression
-  / BinaryExpression
+  / Factor
 
 FunctionCall
   = name:[a-z]+ "(" args:CommaSeparatedList ")" {
@@ -48,56 +44,42 @@ FunctionCall
     }
 
 InfixOperator
-  = ">>="
+  = [^ ]+
 
 InfixExpression
-  = left:Factor _ operator:InfixOperator right:CommaSeparatedList {
+  = ArithmeticInfix
+  / InfixTemplateExpression
+
+InfixTemplateExpression
+  = left:Factor  _ operator:InfixOperator _ right:CommaSeparatedList {
       return {
         type: "InfixExpression",
-        operator: infixes[operator],
+        operator: operator.join(""),
         args: [left, ...right.args]
       }
     }
 
-ConditionalExpression
-  = condition:BinaryExpression  _ "?" success:Expression _ ":" failure:Expression {
+ArithmeticInfix
+  = left:ArithmeticInput _ operator:("+" / "-") _ right: ArithmeticInput {
       return {
-        type: "ConditionalExpression",
-        condition,
-        success,
-        failure
+        type: "InfixExpression",
+        operator,
+        args: [left, right]
       }
     }
 
-BinaryOperator
-  = "+"
-  / "-"
-  / "*"
-  / "/"
-  / "^"
-  / "%"
-  / "<>"
-  / "=="
-  / ">="
-  / "<="
-  / ">"
-  / "<"
-  / "=="
+ArithmeticInput
+  = InfixTemplateExpression
+  / MultiplyInfix
+  / Factor
 
-BinaryExpression
-  = head:Factor tail:(_ BinaryOperator _ Factor)* {
-      return tail.reduce(function(result, element) {
-        const left = result;
-        const right = element[3];
-        const rawOp = element[1];
-        const oper = operToName[rawOp];
-          return {
-            type: "BinaryExpression",
-            operator: oper,
-            left: result,
-            right: right
-          }
-      }, head);
+MultiplyInfix
+  = left:Factor _ operator:("*" / "/") _ right: Factor {
+      return {
+        type: "InfixExpression",
+        operator,
+        args: [left, right]
+      }
     }
 
 CommaSeparatedList
@@ -109,7 +91,7 @@ CommaSeparatedList
     }
 
 Factor
-  = "(" _ expr:BinaryExpression _ ")" { return expr; }
+  = "(" _ expr:Expression _ ")" { return expr; }
   / String
   / Number
   / Boolean
@@ -192,4 +174,4 @@ char
       value: sequence
     }
   }
- 
+
