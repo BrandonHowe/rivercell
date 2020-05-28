@@ -90,13 +90,4 @@ class ProgramEvaluator {
     }
 }
 
-const stringToParse = 'multiply(add(1, C4), 2)';
-console.log(`Parsing ${stringToParse}`);
-console.log("Result", new ProgramEvaluator(<Program>parser.parse(stringToParse), {
-    "C5": <NumberLiteral>{
-        type: "NumberLiteral",
-        value: 5,
-    },
-}, builtInFuncs, builtInInfixes).programResult);
-
 export { ProgramEvaluator }
