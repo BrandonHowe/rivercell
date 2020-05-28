@@ -2,7 +2,9 @@ const path = require("path");
 const FaviconsWebpackPlugin = require('favicons-webpack-plugin');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 
-module.exports = {
+export const contentBase = path.resolve(__dirname, 'dist');
+
+export const baseConfig = {
     entry: "./src/main.ts",
     module: {
         rules: [
