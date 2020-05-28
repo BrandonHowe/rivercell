@@ -4,14 +4,36 @@ import {
     Expression,
     FunctionCall,
     InfixExpression, NumberLiteral,
-    Program,
+    Program, StringLiteral,
     Variable,
 } from "../parser/helpers/expression";
 import { builtInFuncs, builtInInfixes, Func } from "../parser/helpers/builtInFuncs";
 import { isFunctionCall, TypeGuard } from "../parser/helpers/parser";
 
 class ProgramEvaluator {
-    constructor (private program: Program, private variables: Record<string, Expression>, private functions: Record<string, Func>, private infixes: Record<string, string>) {}
+    constructor (private program: Program, private variables: Record<string, Expression>, private functions: Record<string, Func>, private infixes: Record<string, string>) {
+    }
+
+    public static ErrorBuilder = (msg: string): ErrorExpression => ({
+        type: "Error",
+        message: msg,
+    });
+
+    public static NumberBuilder = (num: string): NumberLiteral | ErrorExpression => {
+        if (Number(num).toString() === num) {
+            return {
+                type: "NumberLiteral",
+                value: Number(num)
+            }
+        } else {
+            return ProgramEvaluator.ErrorBuilder(`Value ${num} is not a number and cannot be coerced to a number value.`);
+        }
+    };
+
+    public static StringBuilder = (str: string): StringLiteral => ({
+        type: "StringLiteral",
+        value: str
+    });
 
     private parseInfix (expr: InfixExpression): Expression | ErrorExpression {
         const infixFunc = this.functions[this.infixes[expr.operator].toUpperCase()];
@@ -22,10 +44,7 @@ class ProgramEvaluator {
                 args: expr.args,
             });
         } else {
-            return {
-                type: "Error",
-                message: `Infix operator ${expr.operator} is not defined.`,
-            };
+            return ProgramEvaluator.ErrorBuilder(`Infix operator ${expr.operator} is not defined.`)
         }
     }
 
@@ -33,20 +52,14 @@ class ProgramEvaluator {
         if (this.variables[expr.value]) {
             return this.parseExpression(this.variables[expr.value]);
         } else {
-            return {
-                type: "Error",
-                message: `${expr.value} is not defined.`
-            }
+            return ProgramEvaluator.ErrorBuilder(`${expr.value} is not defined.`);
         }
     }
 
     private parseFunctionCall (expr: FunctionCall): Expression | ErrorExpression {
         const name = expr.name.toUpperCase();
         if (this.functions[name].apply.length !== expr.args.length) {
-            return {
-                type: "Error",
-                message: `Function ${name} expects ${this.functions[name].apply.length} arguments, but received ${expr.args.length}.`,
-            };
+            return ProgramEvaluator.ErrorBuilder(`Function ${name} expects ${this.functions[name].apply.length} arguments, but received ${expr.args.length}.`);
         }
         const args = expr.args.map(l => this.parseExpression(l));
         for (const [idx, arg] of args.entries()) {
@@ -54,10 +67,7 @@ class ProgramEvaluator {
                 return arg;
             }
             if (!this.functions[name].argTypes.input[idx].includes(arg.type)) {
-                return {
-                    type: "Error",
-                    message: `Argument ${idx + 1} of function ${name} expects an argument of type ${this.functions[name].argTypes.input[idx]} but received an argument of type ${arg.type}.`,
-                };
+                return ProgramEvaluator.ErrorBuilder(`Argument ${idx + 1} of function ${name} expects an argument of type ${this.functions[name].argTypes.input[idx]} but received an argument of type ${arg.type}.`);
             }
         }
         return this.functions[name].apply(...args);
@@ -80,6 +90,13 @@ class ProgramEvaluator {
     }
 }
 
-const stringToParse = 'add(1, C4)';
+const stringToParse = 'multiply(add(1, C4), 2)';
 console.log(`Parsing ${stringToParse}`);
-console.log("Result", new ProgramEvaluator(<Program>parser.parse(stringToParse), {"C4": <NumberLiteral>{type: "NumberLiteral", value: 5}}, builtInFuncs, builtInInfixes).programResult);
+console.log("Result", new ProgramEvaluator(<Program>parser.parse(stringToParse), {
+    "C5": <NumberLiteral>{
+        type: "NumberLiteral",
+        value: 5,
+    },
+}, builtInFuncs, builtInInfixes).programResult);
+
+export { ProgramEvaluator }

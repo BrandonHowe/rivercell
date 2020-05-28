@@ -144,6 +144,11 @@ export default new Vuex.Store({
         },
         sheetToCoords: state => {
             return state.sheet.flatMap((l, idx) => l.map((_, index) => ({row: idx, column: index})));
+        },
+        sheetToVars: state => {
+            for (const cell of state.sheet.flat()) {
+
+            }
         }
     }
 });
