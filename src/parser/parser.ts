@@ -10,7 +10,7 @@ import {
 import { builtInFuncs, builtInInfixes, Func } from "../parser/helpers/builtInFuncs";
 import { isFunctionCall, TypeGuard } from "../parser/helpers/parser";
 
-class ProgramParser {
+class ProgramEvaluator {
     constructor (private program: Program, private variables: Record<string, Expression>, private functions: Record<string, Func>, private infixes: Record<string, string>) {}
 
     private parseInfix (expr: InfixExpression): Expression | ErrorExpression {
@@ -82,4 +82,4 @@ class ProgramParser {
 
 const stringToParse = 'add(1, C4)';
 console.log(`Parsing ${stringToParse}`);
-console.log("Result", new ProgramParser(<Program>parser.parse(stringToParse), {"C4": <NumberLiteral>{type: "NumberLiteral", value: 5}}, builtInFuncs, builtInInfixes).programResult);
+console.log("Result", new ProgramEvaluator(<Program>parser.parse(stringToParse), {"C4": <NumberLiteral>{type: "NumberLiteral", value: 5}}, builtInFuncs, builtInInfixes).programResult);
