@@ -129,6 +129,14 @@ const builtInInfixes: Record<string, string> = {
     "*": "MULTIPLY",
     "/": "DIVIDE",
     "<>": "CONCAT",
+    "^": "POW",
+    "%": "MOD",
+    "=": "EQUAL",
+    ">=": "GREQUAL",
+    ">": "GREATER",
+    "<": "LESS",
+    "<=": "LEQUAL",
+    "!=": "NOTEQUAL"
 };
 
 export { builtInFuncs, builtInInfixes, Func };
