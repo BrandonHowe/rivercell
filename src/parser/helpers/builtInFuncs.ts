@@ -20,87 +20,107 @@ const builtInFuncs: Record<string, Func> = {
     ADD: {
         argTypes: {
             input: [["NumberLiteral", "BooleanLiteral"], ["NumberLiteral", "BooleanLiteral"]],
-            output: ["NumberLiteral"]
+            output: ["NumberLiteral"],
         },
         apply: (a: NumOrBool, b: NumOrBool) => ({type: "NumberLiteral", value: Number(a.value) + Number(b.value)}),
     },
     MINUS: {
         argTypes: {
             input: [["NumberLiteral", "BooleanLiteral"], ["NumberLiteral", "BooleanLiteral"]],
-            output: ["NumberLiteral"]
+            output: ["NumberLiteral"],
         },
         apply: (a: NumOrBool, b: NumOrBool) => ({type: "NumberLiteral", value: Number(a.value) - Number(b.value)}),
     },
     MULTIPLY: {
         argTypes: {
             input: [["NumberLiteral", "BooleanLiteral"], ["NumberLiteral", "BooleanLiteral"]],
-            output: ["NumberLiteral"]
+            output: ["NumberLiteral"],
         },
         apply: (a: NumOrBool, b: NumOrBool) => ({type: "NumberLiteral", value: Number(a.value) * Number(b.value)}),
     },
     DIVIDE: {
         argTypes: {
             input: [["NumberLiteral", "BooleanLiteral"], ["NumberLiteral", "BooleanLiteral"]],
-            output: ["NumberLiteral"]
+            output: ["NumberLiteral"],
         },
         apply: (a: NumOrBool, b: NumOrBool) => ({type: "NumberLiteral", value: Number(a.value) / Number(b.value)}),
     },
-    // POW: {
-    //     argTypes: [["number", "boolean"], ["number", "boolean"]],
-    //     apply: (a: NumOrBool, b: NumOrBool) => Number(a) ** Number(b),
-    // },
-    // MOD: {
-    //     argTypes: [["number", "boolean"], ["number", "boolean"]],
-    //     apply: (a: NumOrBool, b: NumOrBool) => Number(a) % Number(b),
-    // },
+    POW: {
+        argTypes: {
+            input: [["NumberLiteral", "BooleanLiteral"], ["NumberLiteral", "BooleanLiteral"]],
+            output: ["NumberLiteral"],
+        },
+        apply: (a: NumOrBool, b: NumOrBool) => ({type: "NumberLiteral", value: Number(a.value) ** Number(b.value)}),
+    },
+    MOD: {
+        argTypes: {
+            input: [["NumberLiteral", "BooleanLiteral"], ["NumberLiteral", "BooleanLiteral"]],
+            output: ["NumberLiteral"],
+        },
+        apply: (a: NumOrBool, b: NumOrBool) => ({type: "NumberLiteral", value: Number(a.value) % Number(b.value)}),
+    },
     CONCAT: {
         argTypes: {
             input: [["NumberLiteral", "BooleanLiteral", "StringLiteral"], ["NumberLiteral", "BooleanLiteral", "StringLiteral"]],
-            output: ["NumberLiteral", "StringLiteral"]
+            output: ["NumberLiteral", "StringLiteral"],
         },
         apply: (a: NumOrBoolOrString, b: NumOrBoolOrString) => {
             const res = a.value.toString() + b.value.toString();
             if (Number(res)) {
                 return {
                     type: "NumberLiteral",
-                    value: Number(res)
-                }
+                    value: Number(res),
+                };
             } else {
                 return {
                     type: "StringLiteral",
-                    value: res
-                }
+                    value: res,
+                };
             }
         },
     },
-    // EQUAL: {
-    //     argTypes: [["number", "string", "boolean"], ["number", "string", "boolean"]],
-    //     apply: (a: CellValue, b: CellValue) => a === b
-    // },
-    // GREQUAL: {
-    //     argTypes: [["number", "string", "boolean"], ["number", "string", "boolean"]],
-    //     apply: (a: CellValue, b: CellValue) => a >= b
-    // },
-    // GREATER: {
-    //     argTypes: [["number", "string", "boolean"], ["number", "string", "boolean"]],
-    //     apply: (a: CellValue, b: CellValue) => a > b
-    // },
-    // LESS: {
-    //     argTypes: [["number", "string", "boolean"], ["number", "string", "boolean"]],
-    //     apply: (a: CellValue, b: CellValue) => a < b
-    // },
-    // LEQUAL: {
-    //     argTypes: [["number", "string", "boolean"], ["number", "string", "boolean"]],
-    //     apply: (a: CellValue, b: CellValue) => a <= b
-    // },
-    // NOTEQUAL: {
-    //     argTypes: [["number", "string", "boolean"], ["number", "string", "boolean"]],
-    //     apply: (a: CellValue, b: CellValue) => a !== b
-    // },
-    // IF: {
-    //     argTypes: [["number", "string", "boolean"], ["number", "string", "boolean"], ["number", "string", "boolean"]],
-    //     apply: (a: CellValue, b: CellValue, c: CellValue) => a ? b : c
-    // }
+    EQUAL: {
+        argTypes: {
+            input: [["NumberLiteral", "StringLiteral", "BooleanLiteral"], ["NumberLiteral", "StringLiteral", "BooleanLiteral"]],
+            output: ["BooleanLiteral"],
+        },
+        apply: <T extends NumOrBoolOrString>(a: T, b: T) => ({type: "BooleanLiteral", value: a.value === b.value}),
+    },
+    GREQUAL: {
+        argTypes: {
+            input: [["NumberLiteral", "StringLiteral", "BooleanLiteral"], ["NumberLiteral", "StringLiteral", "BooleanLiteral"]],
+            output: ["BooleanLiteral"],
+        },
+        apply: <T extends NumOrBoolOrString>(a: T, b: T) => ({type: "BooleanLiteral", value: a.value >= b.value}),
+    },
+    GREATER: {
+        argTypes: {
+            input: [["NumberLiteral", "StringLiteral", "BooleanLiteral"], ["NumberLiteral", "StringLiteral", "BooleanLiteral"]],
+            output: ["BooleanLiteral"],
+        },
+        apply: <T extends NumOrBoolOrString>(a: T, b: T) => ({type: "BooleanLiteral", value: a.value > b.value}),
+    },
+    LESS: {
+        argTypes: {
+            input: [["NumberLiteral", "StringLiteral", "BooleanLiteral"], ["NumberLiteral", "StringLiteral", "BooleanLiteral"]],
+            output: ["BooleanLiteral"],
+        },
+        apply: <T extends NumOrBoolOrString>(a: T, b: T) => ({type: "BooleanLiteral", value: a.value < b.value}),
+    },
+    LEQUAL: {
+        argTypes: {
+            input: [["NumberLiteral", "StringLiteral", "BooleanLiteral"], ["NumberLiteral", "StringLiteral", "BooleanLiteral"]],
+            output: ["BooleanLiteral"],
+        },
+        apply: <T extends NumOrBoolOrString>(a: T, b: T) => ({type: "BooleanLiteral", value: a.value <= b.value}),
+    },
+    NOTEQUAL: {
+        argTypes: {
+            input: [["NumberLiteral", "StringLiteral", "BooleanLiteral"], ["NumberLiteral", "StringLiteral", "BooleanLiteral"]],
+            output: ["BooleanLiteral"],
+        },
+        apply: <T extends NumOrBoolOrString>(a: T, b: T) => ({type: "BooleanLiteral", value: a.value !== b.value}),
+    }
 };
 
 const builtInInfixes: Record<string, string> = {
@@ -108,7 +128,7 @@ const builtInInfixes: Record<string, string> = {
     "-": "MINUS",
     "*": "MULTIPLY",
     "/": "DIVIDE",
-    "<>": "CONCAT"
+    "<>": "CONCAT",
 };
 
 export { builtInFuncs, builtInInfixes, Func };
