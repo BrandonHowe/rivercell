@@ -1,5 +1,5 @@
-import parser from "./lexer";
 import {
+    BooleanLiteral,
     ErrorExpression,
     Expression,
     FunctionCall,
@@ -11,7 +11,11 @@ import { builtInFuncs, builtInInfixes, Func } from "../parser/helpers/builtInFun
 import { isFunctionCall, TypeGuard } from "../parser/helpers/parser";
 
 class ProgramEvaluator {
-    constructor (private program: Program, private variables: Record<string, Expression>, private functions: Record<string, Func>, private infixes: Record<string, string>) {
+    private readonly functions: Record<string, Func>;
+    private infixes: Record<string, string>;
+    constructor (private program: Program, private variables: Record<string, Expression>, functions: Record<string, Func>, infixes: Record<string, string>) {
+        this.functions = {...functions, ...builtInFuncs};
+        this.infixes = {...infixes, ...builtInInfixes};
     }
 
     public static ErrorBuilder = (msg: string): ErrorExpression => ({
@@ -85,8 +89,8 @@ class ProgramEvaluator {
         }
     };
 
-    get programResult () {
-        return this.parseExpression(this.program.body[this.program.body.length - 1]);
+    get programResult (): NumberLiteral | StringLiteral | BooleanLiteral {
+        return <NumberLiteral | StringLiteral | BooleanLiteral>this.parseExpression(this.program.body[this.program.body.length - 1]);
     }
 }
 

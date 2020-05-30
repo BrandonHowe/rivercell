@@ -18,6 +18,7 @@
             <SelectorCell
                 class="topCell"
                 style="grid-column: 1"
+                :cell-value="null"
                 :cells-to-select="$store.getters.sheetToCoords"
             ></SelectorCell>
             <SelectorCell
@@ -26,13 +27,13 @@
                 :style="{'grid-column': num + 2}"
                 :key="`top${num}`"
                 :cell-value="colName(num).toUpperCase()"
-                :cells-to-select="$store.state.sheet.map((_, idx) => ({row: idx, column: num}))"
+                :cells-to-select="$store.getters.sheetToArr.map((_, idx) => ({row: idx, column: num}))"
             ></SelectorCell>
         </div>
         <div
             class="row"
             :style="{'grid-template-columns': `repeat(${$store.state.sheetDims.columns + 1}, 100px)`}"
-            v-for="(row, rowIndex) in $store.state.sheet"
+            v-for="(row, rowIndex) in $store.getters.sheetToArr"
             :key="rowIndex"
         >
             <SelectorCell
@@ -40,7 +41,8 @@
                 style="grid-column: 1"
                 :key="`left${rowIndex}`"
                 :cell-value="rowIndex + 1"
-                :cells-to-select="$store.state.sheet[rowIndex].map((_, idx) => ({row: rowIndex, column: idx}))"
+                :cell-raw="rowIndex + 1"
+                :cells-to-select="$store.getters.sheetRow(rowIndex).map((_, idx) => ({row: rowIndex, column: idx}))"
             ></SelectorCell>
             <Cell
                 class="cell"
@@ -48,7 +50,8 @@
                 :key="cellIndex"
                 :style="{'grid-column': cellIndex + 2}"
                 :cell-location="{row: rowIndex, column: cellIndex}"
-                :cell-value="cell"
+                :cell-value="cell.value"
+                :cell-raw="cell.raw"
             ></Cell>
         </div>
     </div>
