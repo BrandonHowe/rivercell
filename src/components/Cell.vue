@@ -15,7 +15,7 @@
             @input="updateCellValue()"
         />
         <div v-else class="nonInputtingLabel">
-            <label>{{ currValue }}</label>
+            <label>{{ cellValue }}</label>
         </div>
     </div>
 </template>
@@ -40,20 +40,23 @@
         };
 
         @Prop() private cellValue: string;
+        @Prop() private cellRaw: string;
         @Prop() private cellLocation: CellPosition;
 
-        currValue = this.cellValue;
+        currValue = this.cellRaw;
 
         enableInputting (e) {
             if (e.shiftKey) {
                 this.$store.commit("areaSelect", this.cellLocation);
+            } else if (e.ctrlKey) {
+                this.$store.commit("addSelectionArr", [this.cellLocation]);
             } else {
                 this.$store.commit("changeSelected", this.cellLocation);
             }
         }
 
         updateCellValue () {
-            this.$store.dispatch("updateCellValue", {position: this.cellLocation, newValue: this.currValue});
+            this.$store.dispatch("updateCellValue", {position: this.cellLocation, displayValue: this.currValue});
         }
 
         matchingPositions (pos1: CellPosition, pos2: CellPosition) {

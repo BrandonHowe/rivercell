@@ -1,5 +1,8 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import parser from "../parser/lexer";
+import { ProgramEvaluator } from "@/parser/parser";
+import { Expression, Program } from "@/parser/helpers/expression";
 
 Vue.use(Vuex);
 
@@ -11,13 +14,20 @@ interface VuexState {
     },
     selected: CellPosition,
     otherSelected: CellPosition[]
-    sheet: string[][],
+    sheet: CellData[],
     defaults: VuexState
 }
 
 interface CellPosition {
     row: number,
     column: number
+}
+
+interface CellData {
+    position: CellPosition,
+    value: string,
+    displayValue: string,
+    evaluated: boolean
 }
 
 export default new Vuex.Store({
@@ -32,7 +42,7 @@ export default new Vuex.Store({
             column: null
         },
         otherSelected: <CellPosition[]>[],
-        sheet: [],
+        sheet: <CellData[]>[],
         defaults: {
             title: "Unnamed Project",
             sheetDims: {
@@ -44,7 +54,7 @@ export default new Vuex.Store({
                 column: null
             },
             otherSelected: <CellPosition[]>[],
-            sheet: [],
+            sheet: <CellData[]>[],
         }
     },
     mutations: {
@@ -64,26 +74,37 @@ export default new Vuex.Store({
                 }
             }
         },
-        clearSave (state: VuexState) {
+        clearSave (_: VuexState) {
             localStorage.removeItem("state");
         },
         changeTitle (state: VuexState, newTitle: string) {
             state.title = newTitle;
         },
         initializeSheet (state: VuexState, payload: { rows: number, columns: number }) {
-            const sheet = [];
-            for (let i = 0; i < payload.rows; i++) {
-                const row = [];
-                for (let j = 0; j < payload.columns; j++) {
-                    row.push(null);
-                }
-                sheet.push(row);
-            }
             state.sheetDims = payload;
-            state.sheet = sheet;
+            state.sheet = [];
         },
-        updateCellValue (state: VuexState, payload: { position: CellPosition, newValue: string }) {
-            state.sheet[payload.position.row][payload.position.column] = payload.newValue;
+        updateCellValue (state: VuexState, payload: CellData) {
+            const sheetCell = state.sheet.find(l => l.position.row === payload.position.row && l.position.column === payload.position.column);
+            if (sheetCell) {
+                sheetCell.evaluated = payload.displayValue.charAt(0) === "=";
+                const exprVal = (() => {
+                    if (payload.displayValue.charAt(0) === "=") {
+                        return parser.parse(payload.displayValue.slice(1)).body[0];
+                    } else {
+                        if (Number(payload.displayValue).toString() === payload.displayValue) {
+                            return ProgramEvaluator.NumberBuilder(payload.displayValue);
+                        } else {
+                            return ProgramEvaluator.StringBuilder(payload.displayValue);
+                        }
+                    }
+                })();
+                sheetCell.value = payload.displayValue;
+                sheetCell.displayValue = new ProgramEvaluator(<Program>{type: "Program", body: [exprVal]}, null, {}, {}).programResult.value.toString();
+                console.log(state.sheet.find(l => l.position.row === payload.position.row && l.position.column === payload.position.column));
+            } else {
+                state.sheet.push({value: payload.displayValue, ...payload});
+            }
         },
         changeSelected (state: VuexState, newPos: CellPosition) {
             state.selected = newPos;
@@ -142,8 +163,37 @@ export default new Vuex.Store({
             }
             return {rows, cols};
         },
+        sheetToArr: state => {
+            const newState = [];
+            for (let i = 0; i < state.sheetDims.rows; i++) {
+                const row = [];
+                for (let j = 0; j < state.sheetDims.columns; j++) {
+                    const sheetCell = state.sheet.find(l => l.position.row === i && l.position.column === j);
+                    console.log(sheetCell ? {value: sheetCell.displayValue, raw: sheetCell.value} : {value: null, raw: null});
+                    row.push(sheetCell ? {value: sheetCell.displayValue, raw: sheetCell.value} : {value: null, raw: null});
+                }
+                newState.push(row);
+            }
+            return newState;
+        },
+        sheetRow: state => rowNum => {
+            const newState = [];
+            for (let i = 0; i < state.sheetDims.columns; i++) {
+                const sheetCell = state.sheet.find(l => l.position.row === rowNum && l.position.column === i);
+                newState.push(sheetCell ? sheetCell.value : null);
+            }
+            return newState;
+        },
+        sheetCol: state => colNum => {
+            const newState = [];
+            for (let i = 0; i < state.sheetDims.rows; i++) {
+                const sheetCell = state.sheet.find(l => l.position.row === i && l.position.column === colNum);
+                newState.push(sheetCell ? sheetCell.value : null);
+            }
+            return newState;
+        },
         sheetToCoords: state => {
-            return state.sheet.flatMap((l, idx) => l.map((_, index) => ({row: idx, column: index})));
+            return state.sheet.map(l => l.position);
         }
     }
 });

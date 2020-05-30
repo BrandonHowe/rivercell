@@ -1,0 +1,177 @@
+{
+    const operToName = {
+        "+": "ADD",
+        "-": "MINUS",
+        "*": "MULTIPLY",
+        "/": "DIVIDE",
+        "^": "POW",
+        "%": "MOD",
+        "<>": "CONCAT",
+        "==": "EQUAL",
+        ">=": "GREQUAL",
+        ">": "GREATER",
+        "<": "LESS",
+        "<=": "LEQUAL",
+        "!=": "NOTEQUAL",
+    }
+}
+
+Program
+  = body:SourceElements? {
+      return {
+        type: "Program",
+        body: body !== null ? body : []
+      };
+    }
+
+SourceElements
+  = head:Expression tail:(_ Expression)* {
+      return [head, ...tail.map(l => l[1])];
+    }
+
+Expression
+  = FunctionCall
+  / InfixExpression
+  / Factor
+
+FunctionCall
+  = name:[a-z]+ "(" args:CommaSeparatedList ")" {
+      return {
+        type: "FunctionCall",
+        name: name.join(""),
+        args: args.args
+      }
+    }
+
+InfixOperator
+  = [^, ]+
+
+InfixExpression
+  = ArithmeticInfix
+  / InfixTemplateExpression
+
+InfixTemplateExpression
+  = left:Factor  _ operator:InfixOperator _ right:CommaSeparatedList {
+      return {
+        type: "InfixExpression",
+        operator: operator.join(""),
+        args: [left, ...right.args]
+      }
+    }
+
+ArithmeticInfix
+  = left:ArithmeticInput _ operator:("+" / "-") _ right: ArithmeticInput {
+      return {
+        type: "InfixExpression",
+        operator,
+        args: [left, right]
+      }
+    }
+
+ArithmeticInput
+  = InfixTemplateExpression
+  / MultiplyInfix
+  / Factor
+
+MultiplyInfix
+  = left:Factor _ operator:("*" / "/") _ right: Factor {
+      return {
+        type: "InfixExpression",
+        operator,
+        args: [left, right]
+      }
+    }
+
+CommaSeparatedList
+  = head:Expression tail:(_ (",") _ Expression)* {
+        return {
+            type: "CommaSeparatedList",
+            args: [head, ...tail.map(l => l[3])]
+          }
+    }
+
+Factor
+  = "(" _ expr:Expression _ ")" { return expr; }
+  / String
+  / Number
+  / Boolean
+  / CellRange
+  / Variable
+
+Number
+  = Integer
+  / Float
+
+Integer "integer"
+  = _ [0-9]+ {
+      return {
+        type: "NumberLiteral",
+        value: parseInt(text(), 10)
+      }
+    }
+
+Float "float"
+  = _ [0-9]+"."[0-9]+ {
+      return {
+        type: "NumberLiteral",
+        value: parseFloat(text(), 10)
+      }
+    }
+
+String "string"
+  = "'" chars:char* "'" { return {
+    type: "StringLiteral",
+    value: chars.join("")
+  } }
+  / '"' chars:char* '"' { return {
+    type: "StringLiteral",
+    value: chars.join("")
+  } }
+
+Boolean
+  = "true" { return {type: "BooleanLiteral", value: true} }
+  / "false" { return {type: "BooleanLiteral", value: false} }
+
+CellRange
+  = start:Variable ":" end:Variable {
+      return {
+        type: "CellRange",
+        start,
+        end
+      }
+    }
+
+Variable "variable"
+  = _ [A-Z]+[0-9]+ {
+      return {
+        type: "Variable",
+        value: Number.isNaN(Number(text())) ? text() : Number(text())
+      }
+    }
+
+_ "whitespace"
+  = [ \t\n\r]*
+
+char
+  = [^\0-\x1F\x22\x5C\x27]
+  / "\\"
+    sequence:(
+        '"'
+      / "'"
+      / "\\"
+      / "/"
+      / "b" { return "\b"; }
+      / "f" { return "\f"; }
+      / "n" { return "\n"; }
+      / "r" { return "\r"; }
+      / "t" { return "\t"; }
+      / "u" digits:$([0-9a-f]i [0-9a-f]i [0-9a-f]i [0-9a-f]i) {
+          return String.fromCharCode(parseInt(digits, 16));
+        }
+    )
+    { return {
+      type: "Literal",
+      value: sequence
+    }
+  }
+
